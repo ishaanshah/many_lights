@@ -44,10 +44,15 @@ def render_multi_pass(render_func: Callable, res_x: int, res_y: int, scene: mi.S
 
     return result
 
-def generate_rays(scene: mi.Scene, spp: int = None, random_offset: bool=False) -> Tuple[mi.Ray3f,mi.Float]:
+def render_manual(
+    render_func: Callable[[mi.SurfaceInteraction3f], mi.Color3f],
+    scene: mi.Scene,
+    spp: int = None,
+    random_offset: bool=True
+) -> mi.TensorXf:
     # Sensor & Film
-    sensor = scene.sensors()[0]
-    film = sensor.film()
+    sensor: mi.Sensor = scene.sensors()[0]
+    film: mi.Film = sensor.film()
     film_size = film.crop_size() # [width, height] image size
     if film.sample_border():
         # For correctness, we need to sample extra pixels on the border
@@ -55,9 +60,11 @@ def generate_rays(scene: mi.Scene, spp: int = None, random_offset: bool=False) -
         # film.rfilter().border_size() is mult. by 2 to account for left/top & right/bottom borders
         film_size += 2 * film.rfilter().border_size()
 
-    sampler = sensor.sampler()
-    spp = spp or sampler.sample_count()
-    film.prepare([]) # Allocate GPU mem
+    sampler: mi.Sampler = sensor.sampler()
+    if spp:
+        sampler.set_sample_count(spp)
+    spp = sampler.sample_count()
+    film.prepare([])
 
     # Wavefront setup
     wavefront_size = film_size.x * film_size.y * spp
@@ -116,4 +123,22 @@ def generate_rays(scene: mi.Scene, spp: int = None, random_offset: bool=False) -
     if ray.has_differentials:
         ray.scale_differential(diff_scale_factor)
 
-    return ray, ray_weight
+    final_color = [mi.Float(0), mi.Float(0), mi.Float(0), mi.Float(1)]
+
+    ################################
+    # Rendering algorithm
+    ################################
+    si: mi.SurfaceInteraction3f = scene.ray_intersect(ray)
+    res = render_func(si)
+    final_color[0] = res.x
+    final_color[1] = res.y
+    final_color[2] = res.z
+
+    ################################
+    # Save image
+    ################################
+    block.put(sample_pos, final_color)
+    film.put_block(block)
+    img = film.develop()
+
+    return img
