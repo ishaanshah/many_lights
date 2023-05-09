@@ -45,7 +45,7 @@ def render_multi_pass(render_func: Callable, res_x: int, res_y: int, scene: mi.S
     return result
 
 def render_manual(
-    render_func: Callable[[mi.SurfaceInteraction3f], mi.Color3f],
+    render_func: Callable[[mi.SurfaceInteraction3f, mi.Scene], mi.Color3f],
     scene: mi.Scene,
     spp: int = None,
     random_offset: bool=True
@@ -129,7 +129,7 @@ def render_manual(
     # Rendering algorithm
     ################################
     si: mi.SurfaceInteraction3f = scene.ray_intersect(ray)
-    res = render_func(si)
+    res = render_func(si, scene)
     final_color[0] = res.x
     final_color[1] = res.y
     final_color[2] = res.z
