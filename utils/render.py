@@ -23,7 +23,14 @@ def get_spp_per_pass(res_x: int, res_y: int, spp: int) -> Tuple[int, int]:
     else:
         return spp_per_pass, 1
 
-def render_multi_pass(render_func: Callable, res_x: int, res_y: int, scene: mi.Scene, spp: int, save_path: str=None) -> np.ndarray:
+def render_multi_pass(
+    render_func: Callable,
+    res_x: int,
+    res_y: int,
+    scene: mi.Scene,
+    spp: int,
+    save_path: str=None,
+) -> np.ndarray:
     t0 = time.time()
     samples_per_pass, n_passes = get_spp_per_pass(res_x, res_y, spp)
     for pass_ in range(n_passes):
