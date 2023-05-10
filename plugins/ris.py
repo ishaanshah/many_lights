@@ -32,12 +32,10 @@ class ReSTIR(mi.SamplingIntegrator):
         # Show emmiters
         result += si.emitter(scene, active).eval(si, active)
 
-        m = 32
         i = mi.UInt(0)
         reservoir = Reservoir(mi.DirectionSample3f)
-        # loop = mi.Loop("RIS", lambda: (i, reservoir.w_sum, reservoir.sample))
-        # while loop(i < m):
-        while i[0] < m:
+        loop = mi.Loop("RIS", lambda: (i, reservoir.sample, reservoir.w_sum, sampler))
+        while loop(i < self.m):
             ds, emitter_val = scene.sample_emitter_direction(si, sampler.next_2d(active), active=active, test_visibility=False)
 
             # Evaluate BSDF
@@ -49,6 +47,7 @@ class ReSTIR(mi.SamplingIntegrator):
             w = p_hat / dr.maximum(1e-6, ds.pdf)
 
             reservoir.update(w, ds, sampler.next_1d(active), active)
+
             i += 1
 
         active = ~scene.ray_test(si.spawn_ray_to(reservoir.sample.p), active)
@@ -57,7 +56,7 @@ class ReSTIR(mi.SamplingIntegrator):
         bsdf_val = bsdf.eval(ctx, si, wo)
 
         p_hat = dr.norm(bsdf_val * emitter_val)
-        W = dr.select(p_hat > 1e-6, dr.rcp(p_hat) * reservoir.w_sum * dr.rcp(m), 0)
+        W = dr.select(p_hat > 1e-6, dr.rcp(p_hat) * reservoir.w_sum * dr.rcp(self.m), 0)
 
         result += bsdf_val * emmiter_val * W
 
