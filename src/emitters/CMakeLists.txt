@@ -8,4 +8,7 @@ add_plugin(directional     directional.cpp)
 add_plugin(directionalarea directionalarea.cpp)
 add_plugin(spot            spot.cpp)
 add_plugin(projector       projector.cpp)
+
+add_plugin(ltc_area ltc_area.cpp)
+
 set(MI_PLUGIN_TARGETS "${MI_PLUGIN_TARGETS}" PARENT_SCOPE)

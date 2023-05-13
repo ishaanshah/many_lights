@@ -18,9 +18,16 @@ MI_PY_EXPORT(BSDFSample) {
         .def_readwrite("eta", &BSDFSample3f::eta, D(BSDFSample3, eta))
         .def_readwrite("sampled_type", &BSDFSample3f::sampled_type, D(BSDFSample3, sampled_type))
         .def_readwrite("sampled_component", &BSDFSample3f::sampled_component, D(BSDFSample3, sampled_component))
+        
+        .def_readwrite("param1", &BSDFSample3f::param1, D(BSDFSample3, param1))
+        .def_readwrite("param2", &BSDFSample3f::param2, D(BSDFSample3, param2))
+        .def_readwrite("param3", &BSDFSample3f::param3, D(BSDFSample3, param3))
+        .def_readwrite("param4", &BSDFSample3f::param4, D(BSDFSample3, param4))
+        
         .def_repr(BSDFSample3f);
 
-    MI_PY_DRJIT_STRUCT(bs, BSDFSample3f, wo, pdf, eta, sampled_type, sampled_component);
+    MI_PY_DRJIT_STRUCT(bs, BSDFSample3f, wo, pdf, eta, sampled_type, sampled_component,
+        param1, param2, param3, param4);
 }
 
 /// Trampoline for derived types implemented in Python

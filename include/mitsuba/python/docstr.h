@@ -758,6 +758,11 @@ static const char *__doc_mitsuba_BSDFSample3_sampled_type = R"doc(Stores the com
 
 static const char *__doc_mitsuba_BSDFSample3_wo = R"doc(Normalized outgoing direction in local coordinates)doc";
 
+static const char* __doc_mitsuba_BSDFSample3_param1 = R"doc()doc";
+static const char* __doc_mitsuba_BSDFSample3_param2 = R"doc()doc";
+static const char* __doc_mitsuba_BSDFSample3_param3 = R"doc()doc";
+static const char* __doc_mitsuba_BSDFSample3_param4 = R"doc()doc";
+
 static const char *__doc_mitsuba_BSDF_BSDF = R"doc(//! @})doc";
 
 static const char *__doc_mitsuba_BSDF_class = R"doc()doc";
@@ -2338,6 +2343,8 @@ static const char *__doc_mitsuba_EmitterFlags_Infinite = R"doc(The emitter is pl
 static const char *__doc_mitsuba_EmitterFlags_SpatiallyVarying = R"doc(The emission depends on the UV coordinates)doc";
 
 static const char *__doc_mitsuba_EmitterFlags_Surface = R"doc(The emitter is attached to a surface (e.g. area emitters))doc";
+
+static const char* __doc_mitsuba_EmitterFlags_Ltc = R"doc()doc";
 
 static const char *__doc_mitsuba_Emitter_Emitter = R"doc()doc";
 
@@ -8345,6 +8352,18 @@ Returns:
 static const char *__doc_mitsuba_SurfaceInteraction_uv = R"doc(UV surface coordinates)doc";
 
 static const char *__doc_mitsuba_SurfaceInteraction_wi = R"doc(Incident direction in the local shading frame)doc";
+
+static const char* __doc_mitsuba_SurfaceInteraction_ltc_r1 = R"doc()doc";
+static const char* __doc_mitsuba_SurfaceInteraction_ltc_r2 = R"doc()doc";
+static const char* __doc_mitsuba_SurfaceInteraction_ltc_r3 = R"doc()doc";
+
+static const char* __doc_mitsuba_SurfaceInteraction_ltc_inv_r1 = R"doc()doc";
+static const char* __doc_mitsuba_SurfaceInteraction_ltc_inv_r2 = R"doc()doc";
+static const char* __doc_mitsuba_SurfaceInteraction_ltc_inv_r3 = R"doc()doc";
+
+static const char* __doc_mitsuba_SurfaceInteraction_coord_r1 = R"doc()doc";
+static const char* __doc_mitsuba_SurfaceInteraction_coord_r2 = R"doc()doc";
+static const char* __doc_mitsuba_SurfaceInteraction_coord_r3 = R"doc()doc";
 
 static const char *__doc_mitsuba_TShapeKDTree =
 R"doc(Optimized KD-tree acceleration data structure for n-dimensional (n<=4)

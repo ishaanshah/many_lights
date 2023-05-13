@@ -225,6 +225,14 @@ struct SurfaceInteraction : Interaction<Float_, Spectrum_> {
     ShapePtr instance = nullptr;
 
     /**
+     * Variables sed by ltc_* integrators
+     * Stores the LTC matrix
+    */
+    Vector3f ltc_r1, ltc_r2, ltc_r3;
+    Vector3f ltc_inv_r1, ltc_inv_r2, ltc_inv_r3;
+    Vector3f coord_r1, coord_r2, coord_r3;
+
+    /**
      * Boundary-test value used in reparameterized integrators, a soft indicator
      * function which returns a zero value at the silhouette of the shape from
      * the perspective of a given ray. Everywhere else this function will return
@@ -503,7 +511,10 @@ struct SurfaceInteraction : Interaction<Float_, Spectrum_> {
 
     DRJIT_STRUCT(SurfaceInteraction, t, time, wavelengths, p, n, shape, uv,
                  sh_frame, dp_du, dp_dv, dn_du, dn_dv, duv_dx,
-                 duv_dy, wi, prim_index, instance, boundary_test)
+                 duv_dy, wi, prim_index, instance, boundary_test,
+                ltc_r1, ltc_r2, ltc_r3,
+                ltc_inv_r1, ltc_inv_r2, ltc_inv_r3,
+                coord_r1, coord_r2, coord_r3)
 };
 
 // -----------------------------------------------------------------------------

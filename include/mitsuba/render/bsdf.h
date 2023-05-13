@@ -206,6 +206,12 @@ template <typename Float, typename Spectrum> struct BSDFSample3 {
     /// Stores the component index that was sampled by \ref BSDF::sample()
     UInt32 sampled_component;
 
+    /**
+     * Variables sed by ltc_* integrators
+     * Stores the parameters required to fetch from LUT
+    */
+    Float param1, param2, param3, param4;
+
     //! @}
     // =============================================================
 
@@ -234,7 +240,8 @@ template <typename Float, typename Spectrum> struct BSDFSample3 {
     //! @}
     // =============================================================
 
-    DRJIT_STRUCT(BSDFSample3, wo, pdf, eta, sampled_type, sampled_component);
+    DRJIT_STRUCT(BSDFSample3, wo, pdf, eta, sampled_type, sampled_component,
+        param1, param2, param3, param4);
 };
 
 

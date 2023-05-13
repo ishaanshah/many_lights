@@ -51,6 +51,18 @@ MI_PY_EXPORT(SurfaceInteraction) {
         .def_field(SurfaceInteraction3f, instance,      D(SurfaceInteraction, instance))
         .def_field(SurfaceInteraction3f, boundary_test, D(SurfaceInteraction, boundary_test))
 
+        .def_field(SurfaceInteraction3f, ltc_r1, D(SurfaceInteraction, ltc_r1))
+        .def_field(SurfaceInteraction3f, ltc_r2, D(SurfaceInteraction, ltc_r2))
+        .def_field(SurfaceInteraction3f, ltc_r3, D(SurfaceInteraction, ltc_r3))
+
+        .def_field(SurfaceInteraction3f, ltc_inv_r1, D(SurfaceInteraction, ltc_inv_r1))
+        .def_field(SurfaceInteraction3f, ltc_inv_r2, D(SurfaceInteraction, ltc_inv_r2))
+        .def_field(SurfaceInteraction3f, ltc_inv_r3, D(SurfaceInteraction, ltc_inv_r3))
+
+        .def_field(SurfaceInteraction3f, coord_r1, D(SurfaceInteraction, coord_r1))
+        .def_field(SurfaceInteraction3f, coord_r2, D(SurfaceInteraction, coord_r2))
+        .def_field(SurfaceInteraction3f, coord_r3, D(SurfaceInteraction, coord_r3))
+
         // Methods
         .def(py::init<>(), D(SurfaceInteraction, SurfaceInteraction))
         .def(py::init<const SurfaceInteraction3f &>(), "Copy constructor")
@@ -92,7 +104,10 @@ MI_PY_EXPORT(SurfaceInteraction) {
 
     MI_PY_DRJIT_STRUCT(si, SurfaceInteraction3f, t, time, wavelengths, p, n,
                        shape, uv, sh_frame, dp_du, dp_dv, dn_du, dn_dv, duv_dx,
-                       duv_dy, wi, prim_index, instance, boundary_test)
+                       duv_dy, wi, prim_index, instance, boundary_test,
+                       ltc_r1, ltc_r2, ltc_r3,
+                       ltc_inv_r1, ltc_inv_r2, ltc_inv_r3,
+                       coord_r1, coord_r2, coord_r3)
 }
 
 MI_PY_EXPORT(MediumInteraction) {

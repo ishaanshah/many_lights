@@ -23,4 +23,6 @@ add_plugin(pplastic             pplastic.cpp)
 add_plugin(principled           principled.cpp)
 add_plugin(principledthin       principledthin.cpp)
 
+add_plugin(diffuse_with_ggx diffuse_with_ggx.cpp)
+
 set(MI_PLUGIN_TARGETS "${MI_PLUGIN_TARGETS}" PARENT_SCOPE)

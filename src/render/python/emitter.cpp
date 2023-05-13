@@ -10,7 +10,8 @@ MI_PY_EXPORT(EmitterExtras) {
         .def_value(EmitterFlags, Infinite)
         .def_value(EmitterFlags, Surface)
         .def_value(EmitterFlags, SpatiallyVarying)
-        .def_value(EmitterFlags, Delta);
+        .def_value(EmitterFlags, Delta)
+        .def_value(EmitterFlags, Ltc);
 
         MI_PY_DECLARE_ENUM_OPERATORS(EmitterFlags, e)
 }
