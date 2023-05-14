@@ -83,19 +83,15 @@ public:
     Float integrate_edge(Vector3f v1, Vector3f v2) const {
         Float x = dr::dot(v1, v2);
         Float y = dr::abs(x);
-        
+
         Float a = 0.8543985f + (0.4965155f + 0.0145206f * y) * y;
         Float b = 3.4175940f + (4.1616724f + y) * y;
         Float v = a / b;
-        
-        Float term = 0.5f * (1.0f / dr::sqrt(dr::maximum(1.0f - x * x, Float(1e-7)))) - v;
-        
-        Mask cond = x > Float(0.f);
-        Float theta_sintheta = dr::select(cond, v, term);
-        
-        Vector3f res = dr::cross(v1, v2) * theta_sintheta;
-        
-        return res[2];
+
+        Mask cond = x > Float(0);
+        Float theta_sintheta = dr::select(cond, v, 0.5 * (dr::rsqrt(dr::maximum(1.0f - x * x, 1e-7))) - v);
+
+        return (cross(v1, v2) * theta_sintheta)[2];
     }
 
     Mask is_below_horizon(Vector3f v1) const {
@@ -103,21 +99,8 @@ public:
     }
 
     Vector3f intersect_horizon(Vector3f v1, Vector3f v2) const {
-        Vector3f hcp(0.f, 0.f, 1.f);
-        Vector3f vcp = dr::normalize(dr::cross(v1, v2));
-
-        Vector3f cp = dr::cross(vcp, hcp);
-
-        Vector3f i1 = dr::normalize(cp);
-
-        Float vtheta = dr::acos(dr::dot(v1, v2));
-        Float v1_theta = dr::acos(dr::dot(i1, v1));
-        Float v2_theta = dr::acos(dr::dot(i1, v2));
-
-        Mask cond = dr::abs(v1_theta + v2_theta - vtheta) <= 1e-10f;
-        Vector3f p = dr::select(cond, i1, -i1);
-
-        return p;
+        Float t = v1[2] / (v2[2] - v1[2]);
+        return dr::normalize(v1 - (v2 - v1) * t);
     }
 
     Spectrum eval(const SurfaceInteraction3f &si, Mask active) const override {
@@ -158,22 +141,26 @@ public:
             dr::dot(si.coord_r2, v3),
             dr::dot(si.coord_r3, v3));
         v3_ = dr::normalize(v3_);
+
+        Vector3f l1 = v1_;
+        Vector3f l2 = v2_;
+        Vector3f l3 = v3_;
         
-        // Multiply by ltc matrix
-        Vector3f l1(dr::dot(si.ltc_inv_r1, v1_),
-            dr::dot(si.ltc_inv_r2, v1_),
-            dr::dot(si.ltc_inv_r3, v1_));
-        l1 = dr::normalize(l1);
+        // // Multiply by ltc matrix
+        // Vector3f l1(dr::dot(si.ltc_inv_r1, v1_),
+        //     dr::dot(si.ltc_inv_r2, v1_),
+        //     dr::dot(si.ltc_inv_r3, v1_));
+        // l1 = dr::normalize(l1);
 
-        Vector3f l2(dr::dot(si.ltc_inv_r1, v2_),
-            dr::dot(si.ltc_inv_r2, v2_),
-            dr::dot(si.ltc_inv_r3, v2_));
-        l2 = dr::normalize(l2);
+        // Vector3f l2(dr::dot(si.ltc_inv_r1, v2_),
+        //     dr::dot(si.ltc_inv_r2, v2_),
+        //     dr::dot(si.ltc_inv_r3, v2_));
+        // l2 = dr::normalize(l2);
 
-        Vector3f l3(dr::dot(si.ltc_inv_r1, v3_),
-            dr::dot(si.ltc_inv_r2, v3_),
-            dr::dot(si.ltc_inv_r3, v3_));
-        l3 = dr::normalize(l3);
+        // Vector3f l3(dr::dot(si.ltc_inv_r1, v3_),
+        //     dr::dot(si.ltc_inv_r2, v3_),
+        //     dr::dot(si.ltc_inv_r3, v3_));
+        // l3 = dr::normalize(l3);
 
         /* =================
         * Clipping

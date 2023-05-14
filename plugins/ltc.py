@@ -5,9 +5,11 @@ mi.set_log_level(mi.LogLevel.Info)
 
 import drjit as dr
 import matplotlib.pyplot as plt
+import os
 from argparse import ArgumentParser
 from utils.render import render_multi_pass, linear_to_srgb
 from utils.parser import add_common_args
+from utils.fs import create_dir
 
 import ipdb
 
@@ -32,6 +34,7 @@ class LTCIntegrator(mi.SamplingIntegrator):
         bsdf: mi.BSDF = si.bsdf()
         ctx: mi.BSDFContext = mi.BSDFContext()
         bs, _ = bsdf.sample(ctx, si, sampler.next_1d(active), sampler.next_2d(active), active)
+        diffuse = bsdf.eval_diffuse_reflectance(si, active)
 
         result = mi.Color3f(0)
 
@@ -86,7 +89,7 @@ class LTCIntegrator(mi.SamplingIntegrator):
             is_ltc_light = mi.has_flag(emitter.flags(), mi.EmitterFlags.Ltc)
 
             # Evaluate LTC
-            result += emitter.eval(si, active=(active & is_ltc_light))
+            result += diffuse * emitter.eval(si, active=(active & is_ltc_light))
 
             i += 1
 
@@ -100,19 +103,21 @@ if __name__ == "__main__":
     add_common_args(parser)
     args = parser.parse_args()
 
-    scene_desc = mi.cornell_box()
-    scene: mi.Scene = mi.load_file("scenes/matpreview_area_light/scene_ltc_surface.xml")
-    # scene: mi.Scene = mi.load_dict(scene_desc)
-
     # Define integrators
     integrators = {
         "ltc": None,
-        # "mis": mi.load_dict({ "type": "direct" }),
+        "gt": mi.load_dict({ "type": "direct" }),
     }
 
+    out_path = os.path.join("renders", "ltc")
+    create_dir(out_path)
+
     for int_name, integrator in integrators.items():
+        emitter_type = "ltc_area" if "ltc" in int_name else "area"
+        scene: mi.Scene = mi.load_file("scenes/matpreview_area_light/scene_ltc_surface.xml", emitter_type=emitter_type)
+
         render_func = lambda scene, seed, spp: mi.render(scene, spp=spp, integrator=integrator, seed=seed)
-        res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, f"{int_name}.exr")
+        res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, os.path.join(out_path, f"{int_name}.exr"))
         if args.show_render:
             plt.imshow(linear_to_srgb(res))
             plt.show()
