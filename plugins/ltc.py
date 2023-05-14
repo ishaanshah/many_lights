@@ -34,7 +34,6 @@ class LTCIntegrator(mi.SamplingIntegrator):
         bsdf: mi.BSDF = si.bsdf()
         ctx: mi.BSDFContext = mi.BSDFContext()
         bs, _ = bsdf.sample(ctx, si, sampler.next_1d(active), sampler.next_2d(active), active)
-        diffuse = bsdf.eval_diffuse_reflectance(si, active)
 
         result = mi.Color3f(0)
 
@@ -54,8 +53,9 @@ class LTCIntegrator(mi.SamplingIntegrator):
         # Fetch LTC matrix
         si_dummy: mi.SurfaceInteraction3f = dr.zeros(mi.SurfaceInteraction3f)
         si_dummy.uv = mi.Point2f(
-            dr.acos(wi_local.z) * 2 * dr.inv_pi,    # Incident direction
-            dr.clamp(bs.param1, 0.01, 0.99)         # Roughness
+            0.99 * dr.acos(wi_local.z) * 2 * dr.inv_pi,    # Incident direction
+            # dr.clamp(bs.param1, 0.1, 0.99)         # Roughness
+            0.1
         )
 
         r1 = self.ltc_1.eval(si_dummy, active)
@@ -89,7 +89,7 @@ class LTCIntegrator(mi.SamplingIntegrator):
             is_ltc_light = mi.has_flag(emitter.flags(), mi.EmitterFlags.Ltc)
 
             # Evaluate LTC
-            result += diffuse * emitter.eval(si, active=(active & is_ltc_light))
+            result += emitter.eval(si, active=(active & is_ltc_light))
 
             i += 1
 

@@ -225,7 +225,7 @@ struct SurfaceInteraction : Interaction<Float_, Spectrum_> {
     ShapePtr instance = nullptr;
 
     /**
-     * Variables sed by ltc_* integrators
+     * Variables set by ltc_* integrators
      * Stores the LTC matrix
     */
     Vector3f ltc_r1, ltc_r2, ltc_r3;

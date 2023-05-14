@@ -103,6 +103,100 @@ public:
         return dr::normalize(v1 - (v2 - v1) * t);
     }
 
+    /* Integrate the polygon while taking care of clipping vertices */
+    Spectrum integrate_triangle(Vector3f l1, Vector3f l2, Vector3f l3) const {
+        Spectrum result(0.f);
+
+        // Common Vars
+        Vector3f i1, i2;
+        Mask cond;
+
+        // Which are below horizon?
+        Mask l1_below = is_below_horizon(l1);
+        Mask l2_below = is_below_horizon(l2);
+        Mask l3_below = is_below_horizon(l3);
+
+        // l1 above
+        // i1 = intersect_horizon(l1, l2);
+        // i2 = intersect_horizon(l1, l3);
+        // cond = !l1_below && l2_below && l3_below;
+        
+        // result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        // result += dr::select(cond, integrate_edge(i2, l1), 0.f);
+        
+        // result = dr::select(cond, dr::abs(result), result);
+        
+        // // l2 above
+        // i1 = intersect_horizon(l2, l3);
+        // i2 = intersect_horizon(l2, l1);
+        // cond = l1_below && !l2_below && l3_below;
+        
+        // result += dr::select(cond, integrate_edge(l2, i1), 0.f);
+        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        // result += dr::select(cond, integrate_edge(i2, l2), 0.f);
+        
+        // result = dr::select(cond, dr::abs(result), result);
+        
+        // // l3 above
+        // i1 = intersect_horizon(l3, l1);
+        // i2 = intersect_horizon(l3, l2);
+        // cond = l1_below && l2_below && !l3_below;
+        
+        // result += dr::select(cond, integrate_edge(l3, i1), 0.f);
+        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        // result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        
+        // result = dr::select(cond, dr::abs(result), result);
+        
+        // // l1, l2 above
+        // i1 = intersect_horizon(l1, l3);
+        // i2 = intersect_horizon(l2, l3);
+        // cond = !l1_below && !l2_below && l3_below;
+        
+        // result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        // result += dr::select(cond, integrate_edge(i2, l2), 0.f);
+        // result += dr::select(cond, integrate_edge(l2, l1), 0.f);
+        
+        // result = dr::select(cond, dr::abs(result), result);
+        
+        // // l1, l3 above
+        // i1 = intersect_horizon(l1, l2);
+        // i2 = intersect_horizon(l3, l2);
+        // cond = !l1_below && l2_below && !l3_below;
+        
+        // result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        // result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        // result += dr::select(cond, integrate_edge(l3, l1), 0.f);
+        
+        // result = dr::select(cond, dr::abs(result), result);
+        
+        // // l2, l3 above
+        // i1 = intersect_horizon(l2, l1);
+        // i2 = intersect_horizon(l3, l1);
+        // cond = l1_below && !l2_below && !l3_below;
+        
+        // result += dr::select(cond, integrate_edge(l2, i1), 0.f);
+        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        // result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        // result += dr::select(cond, integrate_edge(l3, l2), 0.f);
+        
+        // result = dr::select(cond, dr::abs(result), result);
+        
+        // All above
+        cond = !l1_below && !l2_below && !l3_below;
+
+        result += dr::select(cond, integrate_edge(l1, l2), 0.f);
+        result += dr::select(cond, integrate_edge(l2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, l1), 0.f);
+        
+        result = dr::select(cond, dr::abs(result), result);
+
+        return result;
+    }
+
     Spectrum eval(const SurfaceInteraction3f &si, Mask active) const override {
         MI_MASKED_FUNCTION(ProfilerPhase::EndpointEvaluate, active);
 
@@ -128,130 +222,37 @@ public:
 
         // Multiply by coord frame matrix
         Vector3f v1_(dr::dot(si.coord_r1, v1),
-            dr::dot(si.coord_r2, v1),
-            dr::dot(si.coord_r3, v1));
+                     dr::dot(si.coord_r2, v1),
+                     dr::dot(si.coord_r3, v1));
         v1_ = dr::normalize(v1_);
 
         Vector3f v2_(dr::dot(si.coord_r1, v2),
-            dr::dot(si.coord_r2, v2),
-            dr::dot(si.coord_r3, v2));
+                     dr::dot(si.coord_r2, v2),
+                     dr::dot(si.coord_r3, v2));
         v2_ = dr::normalize(v2_);
 
         Vector3f v3_(dr::dot(si.coord_r1, v3),
-            dr::dot(si.coord_r2, v3),
-            dr::dot(si.coord_r3, v3));
+                     dr::dot(si.coord_r2, v3),
+                     dr::dot(si.coord_r3, v3));
         v3_ = dr::normalize(v3_);
 
-        Vector3f l1 = v1_;
-        Vector3f l2 = v2_;
-        Vector3f l3 = v3_;
-        
-        // // Multiply by ltc matrix
-        // Vector3f l1(dr::dot(si.ltc_inv_r1, v1_),
-        //     dr::dot(si.ltc_inv_r2, v1_),
-        //     dr::dot(si.ltc_inv_r3, v1_));
-        // l1 = dr::normalize(l1);
+        // Multiply by ltc matrix
+        Vector3f l1(dr::dot(si.ltc_inv_r1, v1_),
+                    dr::dot(si.ltc_inv_r2, v1_),
+                    dr::dot(si.ltc_inv_r3, v1_));
+        l1 = dr::normalize(l1);
 
-        // Vector3f l2(dr::dot(si.ltc_inv_r1, v2_),
-        //     dr::dot(si.ltc_inv_r2, v2_),
-        //     dr::dot(si.ltc_inv_r3, v2_));
-        // l2 = dr::normalize(l2);
+        Vector3f l2(dr::dot(si.ltc_inv_r1, v2_),
+                    dr::dot(si.ltc_inv_r2, v2_),
+                    dr::dot(si.ltc_inv_r3, v2_));
+        l2 = dr::normalize(l2);
 
-        // Vector3f l3(dr::dot(si.ltc_inv_r1, v3_),
-        //     dr::dot(si.ltc_inv_r2, v3_),
-        //     dr::dot(si.ltc_inv_r3, v3_));
-        // l3 = dr::normalize(l3);
+        Vector3f l3(dr::dot(si.ltc_inv_r1, v3_),
+                    dr::dot(si.ltc_inv_r2, v3_),
+                    dr::dot(si.ltc_inv_r3, v3_));
+        l3 = dr::normalize(l3);
 
-        /* =================
-        * Clipping
-        =================== */
-
-        // Common Vars
-        Vector3f i1, i2;
-        Mask cond;
-
-        // Which are below horizon?
-        Mask l1_below = is_below_horizon(l1);
-        Mask l2_below = is_below_horizon(l2);
-        Mask l3_below = is_below_horizon(l3);
-
-        // l1 above
-        i1 = intersect_horizon(l1, l2);
-        i2 = intersect_horizon(l1, l3);
-        cond = !l1_below && l2_below && l3_below;
-        
-        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
-        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        result += dr::select(cond, integrate_edge(i2, l1), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
-        
-        // l2 above
-        i1 = intersect_horizon(l2, l3);
-        i2 = intersect_horizon(l2, l1);
-        cond = l1_below && !l2_below && l3_below;
-        
-        result += dr::select(cond, integrate_edge(l2, i1), 0.f);
-        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        result += dr::select(cond, integrate_edge(i2, l2), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
-        
-        // l3 above
-        i1 = intersect_horizon(l3, l1);
-        i2 = intersect_horizon(l3, l2);
-        cond = l1_below && l2_below && !l3_below;
-        
-        result += dr::select(cond, integrate_edge(l3, i1), 0.f);
-        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
-        
-        // l1, l2 above
-        i1 = intersect_horizon(l1, l3);
-        i2 = intersect_horizon(l2, l3);
-        cond = !l1_below && !l2_below && l3_below;
-        
-        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
-        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        result += dr::select(cond, integrate_edge(i2, l2), 0.f);
-        result += dr::select(cond, integrate_edge(l2, l1), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
-        
-        // l1, l3 above
-        i1 = intersect_horizon(l1, l2);
-        i2 = intersect_horizon(l3, l2);
-        cond = !l1_below && l2_below && !l3_below;
-        
-        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
-        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
-        result += dr::select(cond, integrate_edge(l3, l1), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
-        
-        // l2, l3 above
-        i1 = intersect_horizon(l2, l1);
-        i2 = intersect_horizon(l3, l1);
-        cond = l1_below && !l2_below && !l3_below;
-        
-        result += dr::select(cond, integrate_edge(l2, i1), 0.f);
-        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
-        result += dr::select(cond, integrate_edge(l3, l2), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
-        
-        // All above
-        cond = !l1_below && !l2_below && !l3_below;
-
-        result += dr::select(cond, integrate_edge(l1, l2), 0.f);
-        result += dr::select(cond, integrate_edge(l2, l3), 0.f);
-        result += dr::select(cond, integrate_edge(l3, l1), 0.f);
-        
-        result = dr::select(cond, dr::abs(result), result);
+        result += integrate_triangle(l1, l2, l3);
 
         return result;
     }

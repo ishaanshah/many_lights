@@ -173,7 +173,8 @@ public:
         dr::Matrix<Float, 3> ltc_mat(r1[0], r1[1], r1[2],
             r2[0], r2[1], r2[2],
             r3[0], r3[1], r3[2]);
-        dr::Matrix<Float, 3> ltc_mat_inv = inverse(ltc_mat);
+        ltc_mat = dr::transpose(ltc_mat);
+        dr::Matrix<Float, 3> ltc_mat_inv = dr::inverse(ltc_mat);
 
         si.ltc_r1 = r1;
         si.ltc_r2 = r2;
