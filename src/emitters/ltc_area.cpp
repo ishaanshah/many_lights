@@ -99,8 +99,15 @@ public:
     }
 
     Vector3f intersect_horizon(Vector3f v1, Vector3f v2) const {
-        Float t = v1[2] / (v2[2] - v1[2]);
-        return dr::normalize(v1 - (v2 - v1) * t);
+        Vector3f result(0.f);
+        Float t(0.f); 
+        
+        t = dr::select(v2[2] < 0.f, v1[2] / (v1[2] - v2[2]), v2[2] / (v2[2] - v1[2]));
+        result = dr::select(v2[2] < 0.f, v1 + (v2 - v1) * t, v2 + (v1 - v2) * t);
+
+        result[2] = 1e-3f;
+
+        return dr::normalize(result);
     }
 
     /* Integrate the polygon while taking care of clipping vertices */
@@ -117,73 +124,73 @@ public:
         Mask l3_below = is_below_horizon(l3);
 
         // l1 above
-        // i1 = intersect_horizon(l1, l2);
-        // i2 = intersect_horizon(l1, l3);
-        // cond = !l1_below && l2_below && l3_below;
+        i1 = intersect_horizon(l1, l2);
+        i2 = intersect_horizon(l1, l3);
+        cond = !l1_below && l2_below && l3_below;
         
-        // result += dr::select(cond, integrate_edge(l1, i1), 0.f);
-        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        // result += dr::select(cond, integrate_edge(i2, l1), 0.f);
+        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l1), 0.f);
         
-        // result = dr::select(cond, dr::abs(result), result);
+        result = dr::select(cond, dr::abs(result), result);
         
-        // // l2 above
-        // i1 = intersect_horizon(l2, l3);
-        // i2 = intersect_horizon(l2, l1);
-        // cond = l1_below && !l2_below && l3_below;
+        // l2 above
+        i1 = intersect_horizon(l2, l3);
+        i2 = intersect_horizon(l2, l1);
+        cond = l1_below && !l2_below && l3_below;
         
-        // result += dr::select(cond, integrate_edge(l2, i1), 0.f);
-        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        // result += dr::select(cond, integrate_edge(i2, l2), 0.f);
+        result += dr::select(cond, integrate_edge(l2, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l2), 0.f);
         
-        // result = dr::select(cond, dr::abs(result), result);
+        result = dr::select(cond, dr::abs(result), result);
         
-        // // l3 above
-        // i1 = intersect_horizon(l3, l1);
-        // i2 = intersect_horizon(l3, l2);
-        // cond = l1_below && l2_below && !l3_below;
+        // l3 above
+        i1 = intersect_horizon(l3, l1);
+        i2 = intersect_horizon(l3, l2);
+        cond = l1_below && l2_below && !l3_below;
         
-        // result += dr::select(cond, integrate_edge(l3, i1), 0.f);
-        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        // result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
         
-        // result = dr::select(cond, dr::abs(result), result);
+        result = dr::select(cond, dr::abs(result), result);
         
-        // // l1, l2 above
-        // i1 = intersect_horizon(l1, l3);
-        // i2 = intersect_horizon(l2, l3);
-        // cond = !l1_below && !l2_below && l3_below;
+        // l1, l2 above
+        i1 = intersect_horizon(l1, l3);
+        i2 = intersect_horizon(l2, l3);
+        cond = !l1_below && !l2_below && l3_below;
         
-        // result += dr::select(cond, integrate_edge(l1, i1), 0.f);
-        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        // result += dr::select(cond, integrate_edge(i2, l2), 0.f);
-        // result += dr::select(cond, integrate_edge(l2, l1), 0.f);
+        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l2), 0.f);
+        result += dr::select(cond, integrate_edge(l2, l1), 0.f);
         
-        // result = dr::select(cond, dr::abs(result), result);
+        result = dr::select(cond, dr::abs(result), result);
         
-        // // l1, l3 above
-        // i1 = intersect_horizon(l1, l2);
-        // i2 = intersect_horizon(l3, l2);
-        // cond = !l1_below && l2_below && !l3_below;
+        // l1, l3 above
+        i1 = intersect_horizon(l1, l2);
+        i2 = intersect_horizon(l3, l2);
+        cond = !l1_below && l2_below && !l3_below;
         
-        // result += dr::select(cond, integrate_edge(l1, i1), 0.f);
-        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        // result += dr::select(cond, integrate_edge(i2, l3), 0.f);
-        // result += dr::select(cond, integrate_edge(l3, l1), 0.f);
+        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, l1), 0.f);
         
-        // result = dr::select(cond, dr::abs(result), result);
+        result = dr::select(cond, dr::abs(result), result);
         
-        // // l2, l3 above
-        // i1 = intersect_horizon(l2, l1);
-        // i2 = intersect_horizon(l3, l1);
-        // cond = l1_below && !l2_below && !l3_below;
+        // l2, l3 above
+        i1 = intersect_horizon(l2, l1);
+        i2 = intersect_horizon(l3, l1);
+        cond = l1_below && !l2_below && !l3_below;
         
-        // result += dr::select(cond, integrate_edge(l2, i1), 0.f);
-        // result += dr::select(cond, integrate_edge(i1, i2), 0.f);
-        // result += dr::select(cond, integrate_edge(i2, l3), 0.f);
-        // result += dr::select(cond, integrate_edge(l3, l2), 0.f);
+        result += dr::select(cond, integrate_edge(l2, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, l2), 0.f);
         
-        // result = dr::select(cond, dr::abs(result), result);
+        result = dr::select(cond, dr::abs(result), result);
         
         // All above
         cond = !l1_below && !l2_below && !l3_below;
@@ -255,6 +262,146 @@ public:
         result += integrate_triangle(l1, l2, l3);
 
         return result;
+    }
+
+    // Taken from area.cpp
+    std::pair<Ray3f, Spectrum> sample_ray(Float time, Float wavelength_sample,
+                                          const Point2f &sample2, const Point2f &sample3,
+                                          Mask active) const override {
+        MI_MASKED_FUNCTION(ProfilerPhase::EndpointSampleRay, active);
+
+        // 1. Sample spatial component
+        auto [ps, pos_weight] = sample_position(time, sample2, active);
+
+        // 2. Sample directional component
+        Vector3f local = warp::square_to_cosine_hemisphere(sample3);
+
+        // 3. Sample spectral component
+        SurfaceInteraction3f si(ps, dr::zeros<Wavelength>());
+        auto [wavelength, wav_weight] =
+            sample_wavelengths(si, wavelength_sample, active);
+        si.time = time;
+        si.wavelengths = wavelength;
+
+        // Note: some terms cancelled out with `warp::square_to_cosine_hemisphere_pdf`.
+        Spectrum weight = pos_weight * wav_weight * dr::Pi<ScalarFloat>;
+
+        return { si.spawn_ray(si.to_world(local)),
+                 depolarizer<Spectrum>(weight) };
+    }
+
+    std::pair<DirectionSample3f, Spectrum>
+    sample_direction(const Interaction3f &it, const Point2f &sample, Mask active) const override {
+        MI_MASKED_FUNCTION(ProfilerPhase::EndpointSampleDirection, active);
+        Assert(m_shape, "Can't sample from an area emitter without an associated Shape.");
+        DirectionSample3f ds;
+        SurfaceInteraction3f si;
+
+        // One of two very different strategies is used depending on 'm_radiance'
+        if (likely(!m_radiance->is_spatially_varying())) {
+            // Texture is uniform, try to importance sample the shape wrt. solid angle at 'it'
+            ds = m_shape->sample_direction(it, sample, active);
+            active &= dr::dot(ds.d, ds.n) < 0.f && dr::neq(ds.pdf, 0.f);
+
+            si = SurfaceInteraction3f(ds, it.wavelengths);
+        } else {
+            // Importance sample the texture, then map onto the shape
+            auto [uv, pdf] = m_radiance->sample_position(sample, active);
+            active &= dr::neq(pdf, 0.f);
+
+            si = m_shape->eval_parameterization(uv, +RayFlags::All, active);
+            si.wavelengths = it.wavelengths;
+            active &= si.is_valid();
+
+            ds.p = si.p;
+            ds.n = si.n;
+            ds.uv = si.uv;
+            ds.time = it.time;
+            ds.delta = false;
+            ds.d = ds.p - it.p;
+
+            Float dist_squared = dr::squared_norm(ds.d);
+            ds.dist = dr::sqrt(dist_squared);
+            ds.d /= ds.dist;
+
+            Float dp = dr::dot(ds.d, ds.n);
+            active &= dp < 0.f;
+            ds.pdf = dr::select(active, pdf / dr::norm(dr::cross(si.dp_du, si.dp_dv)) *
+                                        dist_squared / -dp, 0.f);
+        }
+
+        UnpolarizedSpectrum spec = m_radiance->eval(si, active) / ds.pdf;
+        ds.emitter = this;
+        return { ds, depolarizer<Spectrum>(spec) & active };
+    }
+
+    Float pdf_direction(const Interaction3f &it, const DirectionSample3f &ds,
+                        Mask active) const override {
+        MI_MASKED_FUNCTION(ProfilerPhase::EndpointEvaluate, active);
+        Float dp = dr::dot(ds.d, ds.n);
+        active &= dp < 0.f;
+
+        Float value;
+        if (!m_radiance->is_spatially_varying()) {
+            value = m_shape->pdf_direction(it, ds, active);
+        } else {
+            // This surface intersection would be nice to avoid..
+            SurfaceInteraction3f si = m_shape->eval_parameterization(ds.uv, +RayFlags::dPdUV, active);
+            active &= si.is_valid();
+
+            value = m_radiance->pdf_position(ds.uv, active) * dr::sqr(ds.dist) /
+                    (dr::norm(dr::cross(si.dp_du, si.dp_dv)) * -dp);
+        }
+
+        return dr::select(active, value, 0.f);
+    }
+
+    Spectrum eval_direction(const Interaction3f &it,
+                            const DirectionSample3f &ds,
+                            Mask active) const override {
+        MI_MASKED_FUNCTION(ProfilerPhase::EndpointEvaluate, active);
+        Float dp = dr::dot(ds.d, ds.n);
+        active &= dp < 0.f;
+
+        SurfaceInteraction3f si(ds, it.wavelengths);
+        UnpolarizedSpectrum spec = m_radiance->eval(si, active);
+        return dr::select(active, depolarizer<Spectrum>(spec), 0.f);
+    }
+
+    std::pair<PositionSample3f, Float>
+    sample_position(Float time, const Point2f &sample,
+                    Mask active) const override {
+        MI_MASKED_FUNCTION(ProfilerPhase::EndpointSamplePosition, active);
+        Assert(m_shape, "Cannot sample from an area emitter without an associated Shape.");
+
+        // Two strategies to sample the spatial component based on 'm_radiance'
+        PositionSample3f ps;
+        if (!m_radiance->is_spatially_varying()) {
+            // Radiance not spatially varying, use area-based sampling of shape
+            ps = m_shape->sample_position(time, sample, active);
+        } else {
+            // Importance sample texture
+            auto [uv, pdf] = m_radiance->sample_position(sample, active);
+            active &= dr::neq(pdf, 0.f);
+
+            auto si = m_shape->eval_parameterization(uv, +RayFlags::All, active);
+            active &= si.is_valid();
+            pdf /= dr::norm(dr::cross(si.dp_du, si.dp_dv));
+
+            ps = si;
+            ps.pdf = pdf;
+            ps.delta = false;
+        }
+
+        Float weight = dr::select(active && ps.pdf > 0.f, dr::rcp(ps.pdf), Float(0.f));
+        return { ps, weight };
+    }
+
+    std::pair<Wavelength, Spectrum>
+    sample_wavelengths(const SurfaceInteraction3f &si, Float sample,
+                       Mask active) const override {
+        return m_radiance->sample_spectrum(
+            si, math::sample_shifted<Wavelength>(sample), active);
     }
 
     ScalarBoundingBox3f bbox() const override { return m_shape->bbox(); }

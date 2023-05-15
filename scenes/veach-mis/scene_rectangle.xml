@@ -4,6 +4,8 @@
 	<default name="resy" value="720" />
 	<default name="resx" value="1280" />
 	<default name="max_depth" value="3" />
+    <default name="emitter_type" value="area" />
+
 	<integrator type="$integrator">
 		<integer name="max_depth" value="$max_depth" />
 	</integrator>
@@ -102,7 +104,7 @@
 	<shape type="obj">
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_1.obj" />
-		<emitter type="area">
+		<emitter type="$emitter_type">
 			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
 		</emitter>
         <transform name="to_world">
@@ -115,7 +117,7 @@
 	<shape type="obj">
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_2.obj" />
-		<emitter type="area">
+		<emitter type="$emitter_type">
 			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
 		</emitter>
         <transform name="to_world">
@@ -128,7 +130,7 @@
 	<shape type="obj">
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_1.obj" />
-		<emitter type="area">
+		<emitter type="$emitter_type">
 			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
 		</emitter>
         <transform name="to_world">
@@ -141,7 +143,7 @@
 	<shape type="obj">
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_2.obj" />
-		<emitter type="area">
+		<emitter type="$emitter_type">
 			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
 		</emitter>
         <transform name="to_world">
@@ -154,7 +156,7 @@
 	<shape type="obj">
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_1.obj" />
-		<emitter type="area">
+		<emitter type="$emitter_type">
 			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
 		</emitter>
         <transform name="to_world">
@@ -167,7 +169,7 @@
 	<shape type="obj">
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_2.obj" />
-		<emitter type="area">
+		<emitter type="$emitter_type">
 			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
 		</emitter>
         <transform name="to_world">
