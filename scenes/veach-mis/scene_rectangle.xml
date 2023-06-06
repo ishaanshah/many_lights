@@ -5,6 +5,7 @@
 	<default name="resx" value="1280" />
 	<default name="max_depth" value="3" />
     <default name="emitter_type" value="area" />
+	<default name="radiance" value="15" />
 
 	<integrator type="$integrator">
 		<integer name="max_depth" value="$max_depth" />
@@ -30,45 +31,33 @@
 			<rgb name="reflectance" value="0.5, 0.5, 0.5" />
 		</bsdf>
 	</bsdf>
-	<bsdf type="twosided" id="SmoothBSDF">
-		<bsdf type="roughconductor">
-			<float name="alpha" value="0.01" />
-			<string name="distribution" value="beckmann" />
-			<rgb name="specular_reflectance" value="0.3, 0.3, 0.3" />
-			<rgb name="eta" value="0.200438, 0.924033, 1.10221" />
-			<rgb name="k" value="3.91295, 2.45285, 2.14219" />
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="GlossyBSDF">
-		<bsdf type="roughconductor">
-			<float name="alpha" value="0.05" />
-			<string name="distribution" value="beckmann" />
-			<rgb name="specular_reflectance" value="0.3, 0.3, 0.3" />
-			<rgb name="eta" value="0.200438, 0.924033, 1.10221" />
-			<rgb name="k" value="3.91295, 2.45285, 2.14219" />
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="RoughBSDF">
-		<bsdf type="roughconductor">
-			<float name="alpha" value="0.1" />
-			<string name="distribution" value="beckmann" />
-			<rgb name="specular_reflectance" value="0.3, 0.3, 0.3" />
-			<rgb name="eta" value="0.200438, 0.924033, 1.10221" />
-			<rgb name="k" value="3.91295, 2.45285, 2.14219" />
-		</bsdf>
-	</bsdf>
 	<bsdf type="twosided" id="NullBSDF">
 		<bsdf type="diffuse">
 			<rgb name="reflectance" value="0, 0, 0" />
 		</bsdf>
 	</bsdf>
+	<bsdf type="twosided" id="SmoothBSDF">
+		<bsdf type="roughconductor">
+			<float name="alpha" value="0.01" />
+			<string name="distribution" value="ggx" />
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="GlossyBSDF">
+		<bsdf type="roughconductor">
+			<float name="alpha" value="0.05" />
+			<string name="distribution" value="ggx" />
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="RoughBSDF">
+		<bsdf type="roughconductor">
+			<float name="alpha" value="0.1" />
+			<string name="distribution" value="ggx" />
+		</bsdf>
+	</bsdf>
 	<bsdf type="twosided" id="SuperRoughBSDF">
 		<bsdf type="roughconductor">
 			<float name="alpha" value="0.25" />
-			<string name="distribution" value="beckmann" />
-			<rgb name="specular_reflectance" value="0.3, 0.3, 0.3" />
-			<rgb name="eta" value="0.200438, 0.924033, 1.10221" />
-			<rgb name="k" value="3.91295, 2.45285, 2.14219" />
+			<string name="distribution" value="ggx" />
 		</bsdf>
 	</bsdf>
 	<shape type="cube" id="Smooth">
@@ -105,7 +94,7 @@
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_1.obj" />
 		<emitter type="$emitter_type">
-			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
+			<rgb name="radiance" value="$radiance" />
 		</emitter>
         <transform name="to_world">
 			<rotate y="1" angle="-90" />
@@ -118,7 +107,7 @@
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_2.obj" />
 		<emitter type="$emitter_type">
-			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
+			<rgb name="radiance" value="$radiance" />
 		</emitter>
         <transform name="to_world">
 			<rotate y="1" angle="-90" />
@@ -131,7 +120,7 @@
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_1.obj" />
 		<emitter type="$emitter_type">
-			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
+			<rgb name="radiance" value="$radiance" />
 		</emitter>
         <transform name="to_world">
 			<rotate y="1" angle="-90" />
@@ -144,7 +133,7 @@
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_2.obj" />
 		<emitter type="$emitter_type">
-			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
+			<rgb name="radiance" value="$radiance" />
 		</emitter>
         <transform name="to_world">
 			<rotate y="1" angle="-90" />
@@ -157,7 +146,7 @@
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_1.obj" />
 		<emitter type="$emitter_type">
-			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
+			<rgb name="radiance" value="$radiance" />
 		</emitter>
         <transform name="to_world">
 			<rotate y="1" angle="-90" />
@@ -170,7 +159,7 @@
 		<ref id="NullBSDF" />
         <string name="filename" value="area_light_2.obj" />
 		<emitter type="$emitter_type">
-			<rgb name="radiance" value="7.59909, 7.59909, 7.59909" />
+			<rgb name="radiance" value="$radiance" />
 		</emitter>
         <transform name="to_world">
 			<rotate y="1" angle="-90" />

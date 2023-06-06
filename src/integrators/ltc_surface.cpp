@@ -139,8 +139,10 @@ public:
 
         if (!m_hide_emitters) {
             EmitterPtr emitter_vis = si.emitter(scene, active);
-            if (dr::any_or<true>(dr::neq(emitter_vis, nullptr)))
-                result += emitter_vis->eval(si, active);
+            if (dr::any_or<true>(dr::neq(emitter_vis, nullptr))) {
+                auto [wav, emission] = emitter_vis->sample_wavelengths(si, Float(0.f), active);
+                result += emission;
+            }
         }
 
         active &= si.is_valid();
@@ -150,22 +152,25 @@ public:
         // Get the BSDF hyperparams (alphax, alphay etc.) in 'bs'
         BSDFContext ctx;
         BSDFPtr bsdf = si.bsdf(ray);
+        Spectrum diffuse_color = bsdf->eval_diffuse_reflectance(si);
         auto [bs, bsdf_val] = bsdf->sample(ctx, si, sampler->next_1d(active),
             sampler->next_2d(active), active);
 
         // Construct local coord frame
-        Vector3f wi_local = si.to_local(si.wi);
-        Vector3f c1 = dr::normalize(Vector3f(wi_local[0], wi_local[1], Float(0.f)));
+        Vector3f c1 = dr::normalize(Vector3f(si.wi[0], si.wi[1], Float(0.f)));
         Vector3f c3 = Vector3f(0.f, 0.f, 1.f);
-        Vector3f c2 = dr::normalize(dr::cross(c3, c1));
+        Vector3f c2 = dr::normalize(dr::cross(c1, c3));
         si.coord_r1 = Vector3f(c1[0], c1[1], c1[2]);
         si.coord_r2 = Vector3f(c2[0], c2[1], c2[2]);
         si.coord_r3 = Vector3f(c3[0], c3[1], c3[2]);
+        // si.coord_r1 = Vector3f(1.f, 0.f, 1.f);
+        // si.coord_r2 = Vector3f(0.f, 1.f, 0.f);
+        // si.coord_r3 = Vector3f(0.f, 0.f, 1.f);
         
         // Fetch LTC matrix
         SurfaceInteraction3f si_dummy = dr::zeros<SurfaceInteraction3f>();
-        si_dummy.uv = Point2f(dr::acos(wi_local[2]) * 2.f * dr::InvPi<Float>,
-            dr::clamp(bs.param1, Float(0.01f), Float(0.99f)));\
+        si_dummy.uv = Point2f(dr::acos(si.wi[2]) * 2.f * dr::InvPi<Float>,
+            dr::clamp(bs.param1, Float(0.01f), Float(0.99f)));
 
         Vector3f r1 = (Vector3f) this->ltc_1->eval_3(si_dummy, active);
         Vector3f r2 = (Vector3f) this->ltc_2->eval_3(si_dummy, active);
@@ -173,20 +178,15 @@ public:
         dr::Matrix<Float, 3> ltc_mat(r1[0], r1[1], r1[2],
             r2[0], r2[1], r2[2],
             r3[0], r3[1], r3[2]);
-        ltc_mat = dr::transpose(ltc_mat);
-        dr::Matrix<Float, 3> ltc_mat_inv = dr::inverse(ltc_mat);
-
+        dr::Matrix<Float, 3> ltc_mat_inv = inverse(ltc_mat);
+        
         si.ltc_r1 = r1;
         si.ltc_r2 = r2;
         si.ltc_r3 = r3;
-
-        si.ltc_inv_r1 = Vector3f(ltc_mat_inv(0, 0), ltc_mat_inv(1, 0), ltc_mat_inv(2, 0));
-        si.ltc_inv_r2 = Vector3f(ltc_mat_inv(0, 1), ltc_mat_inv(1, 1), ltc_mat_inv(2, 1));
-        si.ltc_inv_r3 = Vector3f(ltc_mat_inv(0, 2), ltc_mat_inv(1, 2), ltc_mat_inv(2, 2));
-
-        // si.ltc_inv_r1 = Vector3f(ltc_mat_inv(0, 0), ltc_mat_inv(0, 1), ltc_mat_inv(0, 2));
-        // si.ltc_inv_r2 = Vector3f(ltc_mat_inv(1, 0), ltc_mat_inv(1, 1), ltc_mat_inv(1, 2));
-        // si.ltc_inv_r3 = Vector3f(ltc_mat_inv(2, 0), ltc_mat_inv(2, 1), ltc_mat_inv(2, 2));
+        
+        si.ltc_inv_r1 = Vector3f(ltc_mat_inv(0, 0), ltc_mat_inv(0, 1), ltc_mat_inv(0, 2));
+        si.ltc_inv_r2 = Vector3f(ltc_mat_inv(1, 0), ltc_mat_inv(1, 1), ltc_mat_inv(1, 2));
+        si.ltc_inv_r3 = Vector3f(ltc_mat_inv(2, 0), ltc_mat_inv(2, 1), ltc_mat_inv(2, 2));
         
         // ----------------------- LTC Integration -----------------------
         uint32_t emitter_count = (uint32_t)scene->emitters().size();
@@ -197,7 +197,10 @@ public:
             
             Mask is_ltc_light = has_flag(emitter->flags(), EmitterFlags::Ltc);
             if (dr::any_or<true>(is_ltc_light)) {
-                result += emitter->eval(si, active);
+                Spectrum shading = emitter->eval(si, active);
+                auto [wav, emission] = emitter->sample_wavelengths(si, Float(0.f), active);
+
+                result += diffuse_color * emission * shading[0] + emission * shading[1];
             }
         }
 

@@ -119,6 +119,10 @@ public:
         bs.sampled_type = +BSDFFlags::DiffuseReflection;
         bs.sampled_component = 0;
 
+        // Diffuse has high roughness value
+        bs.param1 = 0.99;
+        bs.param2 = 0.99;
+
         UnpolarizedSpectrum value = m_reflectance->eval(si, active);
 
         return { bs, depolarizer<Spectrum>(value) & (active && bs.pdf > 0.f) };

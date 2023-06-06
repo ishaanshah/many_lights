@@ -254,6 +254,11 @@ public:
         bs.sampled_component = 0;
         bs.sampled_type = +BSDFFlags::GlossyReflection;
 
+        /* Construct a microfacet distribution matching the
+           roughness values at the current surface position. */
+        bs.param1 = m_alpha_u->eval_1(si, active);
+        bs.param2 = m_alpha_v->eval_1(si, active);
+
         // Ensure that this is a valid sample
         active &= dr::neq(bs.pdf, 0.f) && Frame3f::cos_theta(bs.wo) > 0.f;
 

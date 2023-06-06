@@ -26,17 +26,20 @@ ltc_textures = {
     "ltc_1": {
         "type": "bitmap",
         "filename": os.path.join(args.ltc_dir, "isotropic_ggx_1.exr"),
-        "raw": True
+        "raw": True,
+        "wrap_mode": "clamp"
     },
     "ltc_2": {
         "type": "bitmap",
         "filename": os.path.join(args.ltc_dir, "isotropic_ggx_2.exr"),
-        "raw": True
+        "raw": True,
+        "wrap_mode": "clamp"
     },
     "ltc_3": {
         "type": "bitmap",
         "filename": os.path.join(args.ltc_dir, "isotropic_ggx_3.exr"),
-        "raw": True
+        "raw": True,
+        "wrap_mode": "clamp"
     }
 }
 
@@ -46,9 +49,9 @@ integrators = {
     "mis": mi.load_dict({ "type": "direct" }),
     "ltc": mi.load_dict({"type": "ltc", **ltc_textures }),
     "ltc_mc": mi.load_dict({"type": "ltc_mc", **ltc_textures}),
-    "ltc_ris": mi.load_dict({"type": "ltc_ris", "num_proposals": 32, "num_pdf_samples": 1, **ltc_textures})
-    # "emitter": mi.load_dict({ "type": "direct", "bsdf_samples": 0 }),
-    # "bsdf": mi.load_dict({ "type": "direct", "emitter_samples": 0 })
+    "ltc_ris": mi.load_dict({"type": "ltc_ris", "num_proposals": 32, "num_pdf_samples": 4, **ltc_textures}),
+    "emitter": mi.load_dict({ "type": "direct", "bsdf_samples": 0 }),
+    "bsdf": mi.load_dict({ "type": "direct", "emitter_samples": 0 })
 }
 
 for int_name, integrator in integrators.items():
@@ -56,7 +59,7 @@ for int_name, integrator in integrators.items():
     scene: mi.Scene = mi.load_file("scenes/veach-mis/scene_rectangle.xml", emitter_type=emitter_type)
 
     render_func = lambda scene, seed, spp: mi.render(scene, spp=spp, integrator=integrator, seed=seed)
-    res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, os.path.join(out_path, f"{int_name}.exr"))
+    res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, os.path.join(out_path, f"{int_name}.png"))
     if args.show_render:
         plt.imshow(linear_to_srgb(res))
         plt.axis("off")

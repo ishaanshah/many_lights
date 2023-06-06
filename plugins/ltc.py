@@ -41,14 +41,14 @@ class LTCIntegrator(mi.SamplingIntegrator):
         i = mi.UInt(0)
         loop = mi.Loop("LTC Eval", lambda: (i, result))
         while loop(i < num_emitters):
-        # while i[0] < num_emitters:
-            emitter: mi.EmitterPtr = dr.gather(mi.EmitterPtr, emitters, i, active)
+            emitter: mi.Emitter = dr.gather(mi.EmitterPtr, emitters, i, active)
 
             # Only loop over lights which are of type LTC
             is_ltc_light = mi.has_flag(emitter.flags(), mi.EmitterFlags.Ltc)
 
             # Evaluate LTC
-            result += emitter.eval(si, active=(active & is_ltc_light))
+            shading_coeffs = emitter.eval(si, active=(active & is_ltc_light))
+            result += shading_coeffs.y * emitter.sample_wavelengths(si, 0, active)[1]
 
             i += 1
 

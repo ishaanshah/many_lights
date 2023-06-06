@@ -38,6 +38,7 @@ class LTC_MCIntegragtor(mi.SamplingIntegrator):
         emitter_idx, inv_pdf, _ = scene.sample_emitter(sampler.next_1d(active), active)
         emitter: mi.Emitter = dr.gather(type(emitters), emitters, emitter_idx, active)
 
-        result += dr.select(active, emitter.eval(si, active) * inv_pdf, 0)
+        shading_coeffs = emitter.eval(si, active=active)
+        result += shading_coeffs.y * inv_pdf * emitter.sample_wavelengths(si, 0, active)[1]
 
         return result, active, []

@@ -7,16 +7,19 @@
     <texture type="bitmap" id="ltc_1">
         <string name="filename" value="./data/isotropic_ggx_1.exr" />
         <boolean name="raw" value="true" />
+        <string name="wrap_mode" value="clamp" />
     </texture>
     
     <texture type="bitmap" id="ltc_2">
         <string name="filename" value="./data/isotropic_ggx_2.exr" />
         <boolean name="raw" value="true" />
+        <string name="wrap_mode" value="clamp" />
     </texture>
 
     <texture type="bitmap" id="ltc_3">
         <string name="filename" value="./data/isotropic_ggx_3.exr" />
         <boolean name="raw" value="true" />
+        <string name="wrap_mode" value="clamp" />
     </texture>
 
     <integrator type="ltc">
