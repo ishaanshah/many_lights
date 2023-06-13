@@ -13,7 +13,7 @@ from argparse import ArgumentParser
 
 parser = ArgumentParser(conflict_handler="resolve")
 add_common_args(parser)
-parser.add_argument("--ltc_dir", default="data")
+parser.add_argument("--ltc_dir", default="ltc")
 args = parser.parse_args()
 
 scene_desc = mi.cornell_box()
@@ -50,8 +50,8 @@ integrators = {
     "ltc": mi.load_dict({"type": "ltc", **ltc_textures }),
     "ltc_mc": mi.load_dict({"type": "ltc_mc", **ltc_textures}),
     "ltc_ris": mi.load_dict({"type": "ltc_ris", "num_proposals": 32, "num_pdf_samples": 4, **ltc_textures}),
-    "emitter": mi.load_dict({ "type": "direct", "bsdf_samples": 0 }),
-    "bsdf": mi.load_dict({ "type": "direct", "emitter_samples": 0 })
+    # "emitter": mi.load_dict({ "type": "direct", "bsdf_samples": 0 }),
+    # "bsdf": mi.load_dict({ "type": "direct", "emitter_samples": 0 })
 }
 
 for int_name, integrator in integrators.items():
@@ -59,7 +59,7 @@ for int_name, integrator in integrators.items():
     scene: mi.Scene = mi.load_file("scenes/veach-mis/scene_rectangle.xml", emitter_type=emitter_type)
 
     render_func = lambda scene, seed, spp: mi.render(scene, spp=spp, integrator=integrator, seed=seed)
-    res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, os.path.join(out_path, f"{int_name}.png"))
+    res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, os.path.join(out_path, f"{int_name}.exr"))
     if args.show_render:
         plt.imshow(linear_to_srgb(res))
         plt.axis("off")

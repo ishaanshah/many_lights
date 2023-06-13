@@ -173,7 +173,7 @@ public:
 
         m_type = MicrofacetType::GGX;
         m_sample_visible = props.get<bool>("sample_visible", true);
-        color = props.texture<Texture>("color", 1.f);
+        color = props.texture<Texture>("color", 0.f);
 
         if (props.has_property("alpha_u") || props.has_property("alpha_v")) {
             if (!props.has_property("alpha_u") || !props.has_property("alpha_v"))
@@ -210,6 +210,11 @@ public:
         }
         callback->put_object("eta", m_eta.get(), ParamFlags::Differentiable | ParamFlags::Discontinuous);
         callback->put_object("k",   m_k.get(),   ParamFlags::Differentiable | ParamFlags::Discontinuous);
+    }
+
+    Spectrum eval_diffuse_reflectance(const SurfaceInteraction3f& si,
+        Mask active = true) const override {
+        return color->eval(si, active);
     }
 
     std::pair<BSDFSample3f, Spectrum> sample(const BSDFContext &ctx,

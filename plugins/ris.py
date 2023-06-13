@@ -49,7 +49,7 @@ class RISIntegrator(mi.SamplingIntegrator):
             p_hat = dr.norm(bsdf_val * emitter_val)
             w = dr.select(ds.pdf > EPS, p_hat, 0)
 
-            reservoir.update(w, ds, sampler.next_1d(active))
+            reservoir.update(w, ds, sampler.next_1d(active), 0)
 
             i += 1
 

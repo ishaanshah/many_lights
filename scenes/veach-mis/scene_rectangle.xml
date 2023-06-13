@@ -37,27 +37,27 @@
 		</bsdf>
 	</bsdf>
 	<bsdf type="twosided" id="SmoothBSDF">
-		<bsdf type="roughconductor">
+		<bsdf type="diffuse_with_ggx">
 			<float name="alpha" value="0.01" />
-			<string name="distribution" value="ggx" />
+			<!-- <string name="distribution" value="ggx" /> -->
 		</bsdf>
 	</bsdf>
 	<bsdf type="twosided" id="GlossyBSDF">
-		<bsdf type="roughconductor">
+		<bsdf type="diffuse_with_ggx">
 			<float name="alpha" value="0.05" />
-			<string name="distribution" value="ggx" />
+			<!-- <string name="distribution" value="ggx" /> -->
 		</bsdf>
 	</bsdf>
 	<bsdf type="twosided" id="RoughBSDF">
-		<bsdf type="roughconductor">
+		<bsdf type="diffuse_with_ggx">
 			<float name="alpha" value="0.1" />
-			<string name="distribution" value="ggx" />
+			<!-- <string name="distribution" value="ggx" /> -->
 		</bsdf>
 	</bsdf>
 	<bsdf type="twosided" id="SuperRoughBSDF">
-		<bsdf type="roughconductor">
+		<bsdf type="diffuse_with_ggx">
 			<float name="alpha" value="0.25" />
-			<string name="distribution" value="ggx" />
+			<!-- <string name="distribution" value="ggx" /> -->
 		</bsdf>
 	</bsdf>
 	<shape type="cube" id="Smooth">

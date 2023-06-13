@@ -28,10 +28,11 @@ def si_ltc(
     si.coord_r3 = c3
 
     # Fetch LTC matrix
+    alpha = dr.clamp(bs.param1, 0.01, 0.99)
     si_dummy: mi.SurfaceInteraction3f = dr.zeros(mi.SurfaceInteraction3f)
     si_dummy.uv = mi.Point2f(
         0.99 * dr.acos(si.wi.z) * 2 * dr.inv_pi,    # Incident direction
-        dr.clamp(bs.param1, 0.01, 0.99)         # Roughness
+        alpha         # Roughness
     )
 
     r1 = ltc_1.eval(si_dummy, active)

@@ -80,6 +80,51 @@ public:
         callback->put_object("radiance", m_radiance.get(), +ParamFlags::Differentiable);
     }
 
+    std::pair<DirectionSample3f, Spectrum>
+    sample_direction(const Interaction3f &it, const Point2f &sample, Mask active) const override {
+        MI_MASKED_FUNCTION(ProfilerPhase::EndpointSampleDirection, active);
+        Assert(m_shape, "Can't sample from an area emitter without an associated Shape.");
+        DirectionSample3f ds;
+        SurfaceInteraction3f si;
+
+        // One of two very different strategies is used depending on 'm_radiance'
+        if (likely(!m_radiance->is_spatially_varying())) {
+            // Texture is uniform, try to importance sample the shape wrt. solid angle at 'it'
+            ds = m_shape->sample_direction(it, sample, active);
+            active &= dr::dot(ds.d, ds.n) < 0.f && dr::neq(ds.pdf, 0.f);
+
+            si = SurfaceInteraction3f(ds, it.wavelengths);
+        } else {
+            // Importance sample the texture, then map onto the shape
+            auto [uv, pdf] = m_radiance->sample_position(sample, active);
+            active &= dr::neq(pdf, 0.f);
+
+            si = m_shape->eval_parameterization(uv, +RayFlags::All, active);
+            si.wavelengths = it.wavelengths;
+            active &= si.is_valid();
+
+            ds.p = si.p;
+            ds.n = si.n;
+            ds.uv = si.uv;
+            ds.time = it.time;
+            ds.delta = false;
+            ds.d = ds.p - it.p;
+
+            Float dist_squared = dr::squared_norm(ds.d);
+            ds.dist = dr::sqrt(dist_squared);
+            ds.d /= ds.dist;
+
+            Float dp = dr::dot(ds.d, ds.n);
+            active &= dp < 0.f;
+            ds.pdf = dr::select(active, pdf / dr::norm(dr::cross(si.dp_du, si.dp_dv)) *
+                                        dist_squared / -dp, 0.f);
+        }
+
+        UnpolarizedSpectrum spec = m_radiance->eval(si, active) / ds.pdf;
+        ds.emitter = this;
+        return { ds, depolarizer<Spectrum>(spec) & active };
+    }
+
     Float integrate_edge(Vector3f v1, Vector3f v2) const {
         Float x = dr::dot(v1, v2);
         Float y = dr::abs(x);
