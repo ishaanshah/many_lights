@@ -199,6 +199,142 @@ public:
                                                        uint32_t ray_flags = +RayFlags::All,
                                                        Mask active = true) const override;
 
+    virtual Spectrum eval_ltc(const SurfaceInteraction3f &si, UInt32 prim_index, Mask active) const override;
+
+    Float integrate_edge(Vector3f v1, Vector3f v2) const {
+        Float x = dr::dot(v1, v2);
+        Float y = dr::abs(x);
+        
+        Float a = 0.8543985f + (0.4965155f + 0.0145206f * y) * y;
+        Float b = 3.4175940f + (4.1616724f + y) * y;
+        Float v = a / b;
+        
+        Float term = 0.5f * (1.0f / dr::sqrt(dr::maximum(1.0f - x * x, Float(1e-7)))) - v;
+        
+        Mask cond = x > Float(0.f);
+        Float theta_sintheta = dr::select(cond, v, term);
+        
+        Vector3f res = dr::cross(v1, v2) * theta_sintheta;
+        
+        return res[2];
+    }
+
+    Mask is_below_horizon(Vector3f v1) const {
+        return v1[2] <= 0.f;
+    }
+
+    Vector3f intersect_horizon(Vector3f v1, Vector3f v2) const {
+        Vector3f result(0.f);
+        Float t(0.f); 
+        
+        t = v1[2] / (v1[2] - v2[2]);
+        result = v1 * (1.f - t) + v2 * (t);
+
+        return dr::normalize(result);
+    }
+
+    Float clip_and_integrate(Vector3f l1, Vector3f l2, Vector3f l3, Mask facing_away) const {
+        Float result(0.f);
+
+        /* =================
+        * Clipping
+        =================== */
+
+        // Common Vars
+        Vector3f cg = dr::normalize(l1 + l2 + l3);
+        Vector3f i1, i2;
+        Mask cond;
+
+        // Which are below horizon?
+        Mask l1_below = is_below_horizon(l1);
+        Mask l2_below = is_below_horizon(l2);
+        Mask l3_below = is_below_horizon(l3);
+
+        // All below, but covers 2*Pi hemi
+        cond = l1_below && l2_below && l3_below && cg[2] > 0.f && !facing_away;
+        result += dr::select(cond, dr::Pi<Float>, 0.f);
+
+        // l1 above
+        i1 = intersect_horizon(l1, l2);
+        i2 = intersect_horizon(l1, l3);
+        cond = !l1_below && l2_below && l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l1), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        // l2 above
+        i1 = intersect_horizon(l2, l3);
+        i2 = intersect_horizon(l2, l1);
+        cond = l1_below && !l2_below && l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l2, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l2), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        // l3 above
+        i1 = intersect_horizon(l3, l1);
+        i2 = intersect_horizon(l3, l2);
+        cond = l1_below && l2_below && !l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l3, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        // l1, l2 above
+        i1 = intersect_horizon(l1, l3);
+        i2 = intersect_horizon(l2, l3);
+        cond = !l1_below && !l2_below && l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l2), 0.f);
+        result += dr::select(cond, integrate_edge(l2, l1), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        // l1, l3 above
+        i1 = intersect_horizon(l1, l2);
+        i2 = intersect_horizon(l3, l2);
+        cond = !l1_below && l2_below && !l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l1, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, l1), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        // l2, l3 above
+        i1 = intersect_horizon(l2, l1);
+        i2 = intersect_horizon(l3, l1);
+        cond = l1_below && !l2_below && !l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l2, i1), 0.f);
+        result += dr::select(cond, integrate_edge(i1, i2), 0.f);
+        result += dr::select(cond, integrate_edge(i2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, l2), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        // All above
+        cond = !l1_below && !l2_below && !l3_below && !facing_away;
+
+        result += dr::select(cond, integrate_edge(l1, l2), 0.f);
+        result += dr::select(cond, integrate_edge(l2, l3), 0.f);
+        result += dr::select(cond, integrate_edge(l3, l1), 0.f);
+
+        result = dr::select(cond, dr::abs(result), result);
+
+        return result;
+    }
+
     void set_scene(Scene<Float, Spectrum> *scene) { m_scene = scene; }
 
     /** \brief Ray-triangle intersection test

@@ -588,6 +588,11 @@ Shape<Float, Spectrum>::eval_parameterization(const Point2f &, uint32_t, Mask) c
     NotImplementedError("eval_parameterization");
 }
 
+MI_VARIANT
+Spectrum Shape<Float, Spectrum>::eval_ltc(const SurfaceInteraction3f &si, UInt32 index, Mask active) const {
+    return Spectrum(0);
+}
+
 MI_VARIANT std::string Shape<Float, Spectrum>::get_children_string() const {
     std::vector<std::pair<std::string, const Object*>> children;
     children.push_back({ "bsdf", m_bsdf });

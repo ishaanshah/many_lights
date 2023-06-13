@@ -47,7 +47,7 @@ class LTCIntegrator(mi.SamplingIntegrator):
             is_ltc_light = mi.has_flag(emitter.flags(), mi.EmitterFlags.Ltc)
 
             # Evaluate LTC
-            shading_coeffs = emitter.eval(si, active=(active & is_ltc_light))
+            shading_coeffs = emitter.shape().eval_ltc(si, 0, active & is_ltc_light)
             result += shading_coeffs.y * emitter.sample_wavelengths(si, 0, active)[1]
 
             i += 1

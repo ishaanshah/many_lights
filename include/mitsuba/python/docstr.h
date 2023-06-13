@@ -4375,6 +4375,8 @@ static const char *__doc_mitsuba_Mesh_eval_attribute_3 = R"doc()doc";
 
 static const char *__doc_mitsuba_Mesh_eval_parameterization = R"doc()doc";
 
+static const char *__doc_mitsuba_Mesh_eval_ltc= R"doc()doc";
+
 static const char *__doc_mitsuba_Mesh_face_count = R"doc(Return the total number of faces)doc";
 
 static const char *__doc_mitsuba_Mesh_face_data_bytes = R"doc()doc";
@@ -7325,6 +7327,8 @@ R"doc(Parameterize the mesh using UV values
 This function maps a 2D UV value to a surface interaction data
 structure. Its behavior is only well-defined in regions where this
 mapping is bijective. The default implementation throws.)doc";
+
+static const char *__doc_mitsuba_Shape_eval_ltc = R"doc()doc";
 
 static const char *__doc_mitsuba_Shape_exterior_medium = R"doc(Return the medium that lies on the exterior of this shape)doc";
 

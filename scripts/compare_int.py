@@ -55,8 +55,7 @@ integrators = {
 }
 
 for int_name, integrator in integrators.items():
-    emitter_type = "ltc_area" if "ltc" in int_name else "area"
-    scene: mi.Scene = mi.load_file("scenes/veach-mis/scene_rectangle.xml", emitter_type=emitter_type)
+    scene: mi.Scene = mi.load_file("scenes/veach-mis/scene_rectangle.xml")
 
     render_func = lambda scene, seed, spp: mi.render(scene, spp=spp, integrator=integrator, seed=seed)
     res = render_multi_pass(render_func, args.resolution, args.resolution, scene, args.spp, os.path.join(out_path, f"{int_name}.exr"))

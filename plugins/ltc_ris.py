@@ -81,7 +81,7 @@ class LTC_RISIntegrator(mi.SamplingIntegrator):
         emitter: mi.Emitter = dr.gather(type(emitters), emitters, reservoir.sample, active)
 
         # TODO: Perform LTC integration
-        ltc_result = emitter.eval(si, active)
+        ltc_result = emitter.shape().eval_ltc(si, 0, active)
         new_var = ltc_result.y
 
         # p_hat = self.estimate_pdf(si, emitter, sampler, active)

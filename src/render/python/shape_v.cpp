@@ -128,6 +128,12 @@ template <typename Ptr, typename Cls> void bind_shape_generic(Cls &cls) {
             },
             "uv"_a, "ray_flags"_a = +RayFlags::All, "active"_a = true,
             D(Shape, eval_parameterization))
+       .def("eval_ltc",
+            [](Ptr shape, SurfaceInteraction3f &si, UInt32 prim_index, Mask active) {
+                return shape->eval_ltc(si, prim_index, active);
+            },
+            "si"_a, "prim_index"_a, "active"_a = true,
+            D(Shape, eval_ltc))
        .def("surface_area",
             [](Ptr shape) {
                 return shape->surface_area();
@@ -153,6 +159,7 @@ MI_PY_EXPORT(Shape) {
         .def_method(Shape, parameters_grad_enabled)
         .def_method(Shape, primitive_count)
         .def_method(Shape, effective_primitive_count);
+     //    .def_method(Shape, eval_ltc);
 
     bind_shape_generic<Shape *>(shape);
 

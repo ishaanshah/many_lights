@@ -604,6 +604,80 @@ Mesh<Float, Spectrum>::eval_parameterization(const Point2f &uv,
     return si;
 }
 
+MI_VARIANT
+Spectrum Mesh<Float, Spectrum>::eval_ltc(const SurfaceInteraction3f &si, UInt32 prim_index, Mask active) const {
+    Spectrum result(0.f);
+
+    Vector3u face_idx = this->face_indices(prim_index, active);
+
+    Vector3f v1, v2, v3;
+    v1 = this->vertex_position(face_idx[0]);
+    v2 = this->vertex_position(face_idx[1]);
+    v3 = this->vertex_position(face_idx[2]);
+
+    Vector3f light_normal = dr::normalize(
+        this->vertex_normal(face_idx[0]) +
+        this->vertex_normal(face_idx[1]) +
+        this->vertex_normal(face_idx[2])
+    );
+    
+    // Translate with shading point as origin, and normalize
+    v1 = dr::normalize(v1 - si.p);
+    v2 = dr::normalize(v2 - si.p);
+    v3 = dr::normalize(v3 - si.p);
+
+    // Normal facing away
+    Mask facing_away = dr::dot(light_normal, -v1) < 0.f;
+    
+    // Convert to local shading frame
+    v1 = si.to_local(v1);
+    v2 = si.to_local(v2);
+    v3 = si.to_local(v3);
+
+    // Multiply by coord frame matrix
+    Vector3f v1_(dr::dot(si.coord_r1, v1),
+        dr::dot(si.coord_r2, v1),
+        dr::dot(si.coord_r3, v1));
+    v1_ = dr::normalize(v1_);
+
+    Vector3f v2_(dr::dot(si.coord_r1, v2),
+        dr::dot(si.coord_r2, v2),
+        dr::dot(si.coord_r3, v2));
+    v2_ = dr::normalize(v2_);
+
+    Vector3f v3_(dr::dot(si.coord_r1, v3),
+        dr::dot(si.coord_r2, v3),
+        dr::dot(si.coord_r3, v3));
+    v3_ = dr::normalize(v3_);
+
+    // Diffuse Shading
+    Float diffuse_shading = clip_and_integrate(v1_, v2_, v3_, facing_away);
+    
+    // Multiply by ltc matrix
+    Vector3f l1(dr::dot(si.ltc_inv_r1, v1_),
+        dr::dot(si.ltc_inv_r2, v1_),
+        dr::dot(si.ltc_inv_r3, v1_));
+    l1 = dr::normalize(l1);
+
+    Vector3f l2(dr::dot(si.ltc_inv_r1, v2_),
+        dr::dot(si.ltc_inv_r2, v2_),
+        dr::dot(si.ltc_inv_r3, v2_));
+    l2 = dr::normalize(l2);
+
+    Vector3f l3(dr::dot(si.ltc_inv_r1, v3_),
+        dr::dot(si.ltc_inv_r2, v3_),
+        dr::dot(si.ltc_inv_r3, v3_));
+    l3 = dr::normalize(l3);
+
+    // GGX Shading
+    Float ggx_shading = clip_and_integrate(l1, l2, l3, facing_away);
+    
+    result[0] = diffuse_shading;
+    result[1] = ggx_shading;
+
+    return result;
+}
+
 MI_VARIANT Float Mesh<Float, Spectrum>::pdf_position(const PositionSample3f &, Mask) const {
     ensure_pmf_built();
     return m_area_pmf.normalization();

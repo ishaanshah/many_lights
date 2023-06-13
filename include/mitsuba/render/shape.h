@@ -362,6 +362,8 @@ public:
                                                        uint32_t ray_flags = +RayFlags::All,
                                                        Mask active = true) const;
 
+    virtual Spectrum eval_ltc(const SurfaceInteraction3f &si, UInt32 prim_index, Mask active) const;
+
     //! @}
     // =============================================================
 
@@ -654,6 +656,7 @@ DRJIT_VCALL_TEMPLATE_BEGIN(mitsuba::Shape)
     DRJIT_VCALL_METHOD(eval_attribute_1)
     DRJIT_VCALL_METHOD(eval_attribute_3)
     DRJIT_VCALL_METHOD(eval_parameterization)
+    DRJIT_VCALL_METHOD(eval_ltc)
     DRJIT_VCALL_METHOD(ray_intersect_preliminary)
     DRJIT_VCALL_METHOD(ray_intersect)
     DRJIT_VCALL_METHOD(ray_test)
